@@ -1,8 +1,7 @@
 <!DOCTYPE CrossStudio_Project_File>
-<solution Name="ss_twr_init" target="8" version="2">
-  <project Name="ss_twr_init">
-    <configuration
-      Name="Common"
+<solution Name="ble" target="8" version="2">
+  <project Name="ble">
+    <configuration Name="Common"
       arm_architecture="v7EM"
       arm_core_type="Cortex-M4"
       arm_endian="Little"
@@ -44,7 +43,6 @@
       c_additional_options="--reduce_paths" />
     <folder Name="Application">
       <file file_name="../main.c" />
-      <file file_name="../ss_init_main.c" />
       <file file_name="../config/sdk_config.h" />
     </folder>
     <folder Name="Board Definition">

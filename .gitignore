@@ -1,11 +1,16 @@
 # Prerequisites
 *.d
 
+*.emSession
+.vscode
+examples/*/Keil*
+
 # Object files
 *.o
 *.ko
 *.obj
 *.elf
+*.crf
 
 # Linker output
 *.ilk
