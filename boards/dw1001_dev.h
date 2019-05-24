@@ -35,29 +35,20 @@
 
 #define LEDS_INV_MASK  LEDS_MASK
 
-#define BUTTONS_NUMBER 4
+#define BUTTONS_NUMBER 1
 
 #define BUTTON_START   13
-#define BUTTON_1       13
-#define BUTTON_2       14
-#define BUTTON_3       15
-#define BUTTON_4       16
+#define BUTTON_1       2
 #define BUTTON_STOP    16
 #define BUTTON_PULL    NRF_GPIO_PIN_PULLUP
 
-#define BUTTONS_LIST { BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4 }
+#define BUTTONS_LIST { BUTTON_1}
 
 #define BSP_BUTTON_0   BUTTON_1
-#define BSP_BUTTON_1   BUTTON_2
-#define BSP_BUTTON_2   BUTTON_3
-#define BSP_BUTTON_3   BUTTON_4
 
 #define BUTTONS_ACTIVE_STATE 0
 
 #define BSP_BUTTON_0_MASK (1<<BSP_BUTTON_0)
-#define BSP_BUTTON_1_MASK (1<<BSP_BUTTON_1)
-#define BSP_BUTTON_2_MASK (1<<BSP_BUTTON_2)
-#define BSP_BUTTON_3_MASK (1<<BSP_BUTTON_3)
 
 
 #define RX_PIN_NUMBER  11
