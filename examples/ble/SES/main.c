@@ -35,6 +35,7 @@
 #include "ss_init_main.h"
 
 #define DEAD_BEEF                       0xDEADBEEF                         /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
+#define POLL_TX_TO_RESP_RX_DLY_UUS      100
 
 uint8_t node_id = 0;
 bool is_synced = false;
@@ -182,6 +183,13 @@ void uwb_setup(void) {
   
   UNUSED_VARIABLE(xTaskCreate(ss_initiator_task_function, "SSTWR_INIT", configMINIMAL_STACK_SIZE + 200, NULL, 2, &ss_initiator_task_handle));
 
+/* Setup DW1000 IRQ pin */  
+  nrf_gpio_cfg_input(DW1000_IRQ, NRF_GPIO_PIN_NOPULL); 		//irq
+  
+  /*Initialization UART*/
+  boUART_Init ();
+  printf("Singled Sided Two Way Ranging Initiator Example \r\n");
+  
   /* Reset DW1000 */
   reset_DW1000(); 
 
@@ -195,18 +203,11 @@ void uwb_setup(void) {
     while (1) {};
   }
 
-  // Set SPI to 8MHz clock  
+  // Set SPI to 8MHz clock
   port_set_dw1000_fastrate();
 
   /* Configure DW1000. */
   dwt_configure(&config);
-
-  /* Initialization of the DW1000 interrupt*/
-  /* Callback are defined in ss_init_main.c */
-  dwt_setcallbacks(&tx_conf_cb, &rx_ok_cb, &rx_to_cb, &rx_err_cb);
-
-  /* Enable wanted interrupts (TX confirmation, RX good frames, RX timeouts and RX errors). */
-  dwt_setinterrupt(DWT_INT_TFRS | DWT_INT_RFCG | DWT_INT_RFTO | DWT_INT_RXPTO | DWT_INT_RPHE | DWT_INT_RFCE | DWT_INT_RFSL | DWT_INT_SFDT, 1);
 
   /* Apply default antenna delay value. See NOTE 2 below. */
   dwt_setrxantennadelay(RX_ANT_DLY);

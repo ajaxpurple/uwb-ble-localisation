@@ -42,10 +42,12 @@
       Name="External Keil"
       c_additional_options="--reduce_paths" />
     <folder Name="Application">
-      <file file_name="../main.c" />
-      <file file_name="../config/sdk_config.h" />
+      <file file_name="main.c" />
+      <file file_name="sdk_config.h" />
       <file file_name="os_ble.c" />
       <file file_name="os_ble.h" />
+      <file file_name="ss_init_main.h" />
+      <file file_name="ss_init_main.c" />
     </folder>
     <folder Name="Board Definition">
       <file file_name="../../../nRF5_SDK_14.2.0/components/boards/boards.c" />
