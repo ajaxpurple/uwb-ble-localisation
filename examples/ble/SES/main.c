@@ -34,6 +34,7 @@
 #include "semphr.h"
 #include "ss_init_main.h"
 
+#define DEBUG 1
 #define DEAD_BEEF                       0xDEADBEEF                         /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 #define POLL_TX_TO_RESP_RX_DLY_UUS      100
 
@@ -64,33 +65,8 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name){
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-void reset(){
-  is_synced = false;
-  xQueueSendFromISR(bleSetId, &node_id, 0);
-}
-
 static void button_event_handler(uint8_t pin_no, uint8_t button_action){    
     if (button_action == APP_BUTTON_PUSH) {
-        node_id++;
-        node_id = node_id & 3;
-        switch(node_id){
-          case 0:
-            LEDS_OFF(BSP_LED_2_MASK | BSP_LED_3_MASK);
-            break;
-          case 1:
-            LEDS_OFF(BSP_LED_2_MASK);
-            LEDS_ON(BSP_LED_3_MASK);
-            break;
-          case 2:
-            LEDS_ON(BSP_LED_2_MASK);
-            LEDS_OFF(BSP_LED_3_MASK);
-            break;
-          case 3:
-            LEDS_ON(BSP_LED_2_MASK | BSP_LED_3_MASK);
-            break;
-        }
-        
-        reset();
     }    
 }
 
@@ -114,49 +90,24 @@ void uwbTask(){
 }
 
 void mainTask(){
-  
-  //xSemaphoreGive(bleBroadcastStart);
-  
   uint16_t ping;
   uint8_t recv_node_id;
   bool ble_received[3] = {false};
   int8_t ble_rssi[3];
   int8_t rssi;
   bool all_done;
+  xSemaphoreGive(bleBroadcastStart);
+  vTaskDelay(100);
+  xSemaphoreGive(bleBroadcastStop);
+  xSemaphoreGive(bleScanStart);
   for(;;){
-    if(node_id > 0){
-      if(!is_synced){
-        xSemaphoreGive(bleScanStart);
-        if(xQueueReceive(bleScanResult, &ping, 0) == pdPASS){
+      if (xQueueReceive(bleScanResult, &ping, 0) == pdPASS) {
           LEDS_INVERT(BSP_LED_1_MASK);
           vTaskDelay(10);
           LEDS_INVERT(BSP_LED_1_MASK);
-          
-          recv_node_id = (ping>>8)&0xFF;
-          rssi = (int8_t) (ping & 0xFF);
-          printf("Node: %d, RSSI: %d\r\n", recv_node_id, rssi);
-           if(recv_node_id == 0){
-              printf("Synced from mobile node\r\n");
-              xSemaphoreGive(bleBroadcastStart);
-              LEDS_ON(BSP_LED_1_MASK);
-              is_synced = true;
-           }
-        }
-      }
-   }else{
-      if(!is_synced){
-        xSemaphoreGive(bleBroadcastStart);
-        xSemaphoreGive(bleBroadcastStop);
-        xSemaphoreGive(bleScanStart);
-        is_synced = true;
-      }else{
-        if(xQueueReceive(bleScanResult, &ping, 0) == pdPASS){
-            LEDS_INVERT(BSP_LED_1_MASK);
-            vTaskDelay(10);
-            LEDS_INVERT(BSP_LED_1_MASK);
-           recv_node_id = (ping>>8)&0xFF;
-           rssi = (int8_t) (ping & 0xFF);
-           if(recv_node_id > 0){
+         recv_node_id = (ping>>8)&0xFF;
+         rssi = (int8_t) (ping & 0xFF);
+         if(recv_node_id > 0){
              printf("Node: %d, RSSI: %d\r\n", recv_node_id, rssi);
              ble_received[recv_node_id-1] = true;
              ble_rssi[recv_node_id-1] = rssi;
@@ -164,17 +115,15 @@ void mainTask(){
              for(uint8_t i=0; i<3; i++){
               all_done = all_done && ble_received[i];
              }
-             if(all_done){
-                printf("ble: [%d, %d, %d]\r\n", ble_rssi[0], ble_rssi[1], ble_rssi[2]);
-                for(uint8_t i=0; i<3; i++){
-                  ble_received[i] = false;
-                }
-             }
+           if(all_done){
+              printf("wifi -w {ble: [%d, %d, %d]}\r\n", ble_rssi[0], ble_rssi[1], ble_rssi[2]);
+              for(uint8_t i=0; i<3; i++){
+                ble_received[i] = false;
+              }
            }
         }
       }
-   }
-   vTaskDelay(100);
+      vTaskDelay(50);
  }
 }
 
@@ -188,7 +137,7 @@ void uwb_setup(void) {
   
   /*Initialization UART*/
   boUART_Init ();
-  printf("Singled Sided Two Way Ranging Initiator Example \r\n");
+  //printf("Singled Sided Two Way Ranging Initiator Example \r\n");
   
   /* Reset DW1000 */
   reset_DW1000(); 
@@ -224,13 +173,12 @@ void uwb_setup(void) {
 
 int main(void){  
   leds_setup();
-  button_setup();
   ble_setup();
   uwb_setup();
   boUART_Init();  
   
   xTaskCreate( bleTask, "ble", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
-  xTaskCreate( uwbTask, "uwb", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
+  //xTaskCreate( uwbTask, "uwb", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
   xTaskCreate( mainTask, "main", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
   vTaskStartScheduler();
   while(1){

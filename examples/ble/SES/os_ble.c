@@ -10,7 +10,7 @@
 #include "semphr.h"
 
 #define APP_BLE_CONN_CFG_TAG            1                                  /**< A tag identifying the SoftDevice BLE configuration. */
-#define NON_CONNECTABLE_ADV_INTERVAL    MSEC_TO_UNITS(100, UNIT_0_625_MS)  /**< The advertising interval for non-connectable advertisement (100 ms). This value can vary between 100ms to 10.24s). */
+#define NON_CONNECTABLE_ADV_INTERVAL    MSEC_TO_UNITS(1000, UNIT_0_625_MS)  /**< The advertising interval for non-connectable advertisement (100 ms). This value can vary between 100ms to 10.24s). */
 
 #define APP_BEACON_INFO_LENGTH          0x17                               
 #define APP_ADV_DATA_LENGTH             0x15                               
@@ -50,8 +50,8 @@ static uint8_t m_beacon_info[APP_BEACON_INFO_LENGTH] =                    /**< I
                          // this implementation.
 };
 
-#define SCAN_INTERVAL           0x00A0                                  /**< Determines scan interval in units of 0.625 millisecond. */
-#define SCAN_WINDOW             0x0050                                  /**< Determines scan window in units of 0.625 millisecond. */
+#define SCAN_INTERVAL           0x0060                                  /**< Determines scan interval in units of 0.625 millisecond. */
+#define SCAN_WINDOW             0x0030                                  /**< Determines scan window in units of 0.625 millisecond. */
 #define SCAN_TIMEOUT            0x0000                                  /**< Timout when scanning. 0x0000 disables timeout. */
 
 /** @brief Parameters used when scanning. */
@@ -176,7 +176,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     bleScanStart = xSemaphoreCreateBinary();
     bleScanStop = xSemaphoreCreateBinary();
     bleSetId = xQueueCreate(1, sizeof(uint8_t));
-    bleScanResult = xQueueCreate(10, sizeof(uint16_t));
+    bleScanResult = xQueueCreate(20, sizeof(uint16_t));
 }
 
 
@@ -232,6 +232,6 @@ void bleTask(){
         scan_start();
       }
     }
-    vTaskDelay(100);
+    vTaskDelay(50);
   }
 }

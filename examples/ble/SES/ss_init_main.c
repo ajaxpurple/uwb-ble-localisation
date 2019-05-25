@@ -425,7 +425,7 @@ void ss_initiator_task_function (void * pvParameter)
   while (true)
   {
     
-    printf("{UWB:[");
+    printf("wifi -w {UWB:[");
     
     ss_init_run1();
     printf(",");
