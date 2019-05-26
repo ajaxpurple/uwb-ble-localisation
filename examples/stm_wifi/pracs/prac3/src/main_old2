@@ -1,0 +1,90 @@
+/* Includes ------------------------------------------------------------------*/
+#include "stm32l475e_iot01.h"
+#include "wifi.h"
+#include "stdio.h"
+#include "s4436572_hal_printf.h"
+#include "s4436572_hal_wifi.h"
+#include "s4436572_hal_led.h"
+/* Private defines -----------------------------------------------------------*/
+/* Update SSID and PASSWORD with own Access point settings */
+
+#define WIFI_WRITE_TIMEOUT 10000
+#define WIFI_READ_TIMEOUT  10000
+
+#define TERMINAL_USE
+
+#define CONNECTION_TRIAL_MAX          10
+/* Private variables ---------------------------------------------------------*/
+
+uint8_t RemoteIP[] = {192, 168, 43, 36};
+uint16_t Port = 65432;
+uint8_t RxData [500];
+char* modulename;
+uint8_t TxData[] = "STM32 : Hello!\n";
+uint16_t RxLen;
+uint8_t  MAC_Addr[6]; 
+uint8_t  IP_Addr[4]; 
+
+void SysTick_Handler(void){
+  HAL_IncTick();
+}
+
+/**
+  * @brief  Main program
+  * @param  None
+  * @retval None
+  */
+int main(void)
+{
+  int32_t Socket = -1;
+  uint16_t Datalen;
+  uint16_t Trials = CONNECTION_TRIAL_MAX;
+  
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+  BSP_LED_Init(LED2); 
+  s4436572_hal_led_init();
+  s4436572_hal_printf_init();
+  s4436572_hal_wifi_init();
+  debug_printf("Wifi init\r\n");
+  //ScanResult result = s4436572_hal_wifi_scan();
+  
+  //for(uint8_t i=0; i<result.count; i++){
+  //  debug_printf("SSID %s\r\n", result.ap[i].SSID);
+ // }
+  
+  while(s4436572_hal_wifi_join("csse4011", "4011prac3") != 0){
+    debug_printf("FAIL!\r\n");
+    HAL_Delay(1000);
+  };
+  debug_printf("Joined network\r\n");  
+  
+  
+  int fail = 1;
+  while(1){
+    if(fail){
+      fail = s4436572_hal_wifi_open(0, "Hello", RemoteIP, Port);
+      if(fail){
+        debug_printf("FAIL!\r\n");
+        HAL_Delay(1000);
+      }
+    }
+    if(!fail){
+      debug_printf("Success!\r\n");
+      int status = s4436572_hal_wifi_write(0, "QWERTYUIOP\r\n", 12);
+      if(status == 0){
+        debug_printf("FAI\r\n");
+        fail = 1;
+        s4436572_hal_wifi_close(0);
+        continue;
+      }
+      status = s4436572_hal_wifi_read(0, RxData, 100);
+      if(status > 0){
+        s4436572_hal_led_toggle(2);
+        debug_printf(RxData);
+      }
+    }
+    HAL_Delay(300);
+    s4436572_hal_led_toggle(0);
+  }
+}
