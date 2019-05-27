@@ -102,9 +102,6 @@ void mainTask(){
   bool all_done;
   
   xSemaphoreGive(bleBroadcastStart);
-  vTaskDelay(100);
-  
-  xSemaphoreGive(bleBroadcastStop);
   xSemaphoreGive(bleScanStart);
   
   int task_counter = 0;
