@@ -90,36 +90,52 @@ void uwbTask(){
 }
 
 void mainTask(){
+  
   uint16_t ping;
   uint8_t recv_node_id;
+  
   bool ble_received[3] = {false};
+  
   int8_t ble_rssi[3];
   int8_t rssi;
+  
   bool all_done;
+  
   xSemaphoreGive(bleBroadcastStart);
   vTaskDelay(100);
+  
   xSemaphoreGive(bleBroadcastStop);
   xSemaphoreGive(bleScanStart);
+  
+  int task_counter = 0;
+
   for(;;){
+      
       if (xQueueReceive(bleScanResult, &ping, 0) == pdPASS) {
-          LEDS_INVERT(BSP_LED_1_MASK);
-          vTaskDelay(10);
-          LEDS_INVERT(BSP_LED_1_MASK);
+         
+         LEDS_INVERT(BSP_LED_1_MASK);
+         vTaskDelay(10);
+         LEDS_INVERT(BSP_LED_1_MASK);
+
          recv_node_id = (ping>>8)&0xFF;
          rssi = (int8_t) (ping & 0xFF);
+         
          if(recv_node_id > 0){
-             printf("Node: %d, RSSI: %d\r\n", recv_node_id, rssi);
+             //printf("Node: %d, RSSI: %d\r\n", recv_node_id, rssi);
+             //printf("USS: %d\n\r", rssi);
              ble_received[recv_node_id-1] = true;
              ble_rssi[recv_node_id-1] = rssi;
              all_done = true;
              for(uint8_t i=0; i<3; i++){
               all_done = all_done && ble_received[i];
              }
-           if(all_done){
-              printf("wifi -w {ble: [%d, %d, %d]}\r\n", ble_rssi[0], ble_rssi[1], ble_rssi[2]);
+           if(all_done && (xTaskGetTickCount() - task_counter > 500)){
+              //printf("{ble:[%d,%d,%d]}\r\n", ble_rssi[0], ble_rssi[1], ble_rssi[2]);
               for(uint8_t i=0; i<3; i++){
                 ble_received[i] = false;
               }
+
+              task_counter = xTaskGetTickCount();
            }
         }
       }
@@ -178,7 +194,7 @@ int main(void){
   boUART_Init();  
   
   xTaskCreate( bleTask, "ble", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
-  //xTaskCreate( uwbTask, "uwb", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
+  xTaskCreate( uwbTask, "uwb", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
   xTaskCreate( mainTask, "main", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
   vTaskStartScheduler();
   while(1){

@@ -28,7 +28,7 @@
 #include "ss_resp_main.h"
 
 /* Inter-ranging delay period, in milliseconds. See NOTE 1*/
-#define RNG_DELAY_MS 80
+#define RNG_DELAY_MS 100
 
    
 static uint8 tx_resp_msg[] = {0x41, 0x88, 0, 0xCA, 0xDE, 'S', 'N', 'O', '1', 0xE1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

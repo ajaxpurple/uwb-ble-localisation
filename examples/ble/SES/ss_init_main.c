@@ -78,6 +78,10 @@ static volatile int tx_count = 0 ; // Successful transmit counter
 static volatile int rx_count = 0 ; // Successful receive counter 
 
 
+int val1 = 0;
+int val2 = 0;
+int val3 = 0;
+
 /*! ------------------------------------------------------------------------------------------------------------------
 * @fn main()
 *
@@ -167,7 +171,7 @@ int ss_init_run1(void)
 
       tof = ((rtd_init - rtd_resp * (1.0f - clockOffsetRatio)) / 2.0f) * DWT_TIME_UNITS; // Specifying 1.0f and 2.0f are floats to clear warning 
       distance = tof * SPEED_OF_LIGHT;
-      printf("%0.2f", distance);
+      val1 = distance * 100;
     }
   }
 
@@ -179,7 +183,7 @@ int ss_init_run1(void)
     /* Reset RX to properly reinitialise LDE operation. */
     dwt_rxreset();
 
-    printf("%d", 0xFFFF);
+    val1 = 0xFFFF;
   }
 
   /* Execute a delay between ranging exchanges. */
@@ -268,7 +272,7 @@ int ss_init_run2(void)
 
       tof = ((rtd_init - rtd_resp * (1.0f - clockOffsetRatio)) / 2.0f) * DWT_TIME_UNITS; // Specifying 1.0f and 2.0f are floats to clear warning 
       distance = tof * SPEED_OF_LIGHT;
-      printf("%0.2f", distance);
+      val2 = distance * 100;  //cm
     }
   }
 
@@ -280,7 +284,7 @@ int ss_init_run2(void)
     /* Reset RX to properly reinitialise LDE operation. */
     dwt_rxreset();
 
-    printf("%d", 0xFFFF);
+    val2 = 0xFFFF;
   }
 
   /* Execute a delay between ranging exchanges. */
@@ -369,7 +373,7 @@ int ss_init_run3(void)
 
       tof = ((rtd_init - rtd_resp * (1.0f - clockOffsetRatio)) / 2.0f) * DWT_TIME_UNITS; // Specifying 1.0f and 2.0f are floats to clear warning 
       distance = tof * SPEED_OF_LIGHT;
-      printf("%0.2f", distance);
+      val3 = distance * 100;
     }
   }
 
@@ -380,7 +384,7 @@ int ss_init_run3(void)
 
     /* Reset RX to properly reinitialise LDE operation. */
     dwt_rxreset();
-    printf("%d", 0xFFFF);
+    val3 = 0xFFFF;
   }
 
   /* Execute a delay between ranging exchanges. */
@@ -421,25 +425,29 @@ void ss_initiator_task_function (void * pvParameter)
   //dwt_setrxtimeout(RESP_RX_TIMEOUT_UUS);
 
   dwt_setleds(DWT_LEDS_ENABLE);
+  
+  int task_counter = 0;
 
   while (true)
   {
     
-    printf("wifi -w {UWB:[");
-    
     ss_init_run1();
-    printf(",");
     vTaskDelay(RNG_DELAY_MS);
 
     ss_init_run2();
-    printf(",");
     vTaskDelay(RNG_DELAY_MS);
 
     ss_init_run3();
-    printf("]}\n\r");
     vTaskDelay(RNG_DELAY_MS);
 
-    /* Tasks must be implemented to never return... */
+    printf("Hi\n\r");
+
+    if (xTaskGetTickCount() - task_counter > 500) {
+      task_counter = xTaskGetTickCount();
+      printf("{UWB:[%d,%d,%d]}\n\r", val1, val2, val3);
+    }
+    //printf("wifi -w {UWB:[%d,%d,%d]}\n\r", val1, val2, val3);
+    //printf("USS: %d\n\r", val1);
   }
 }
 

@@ -103,7 +103,7 @@ static void advertising_init(void)
 
     sd_ble_gap_adv_stop();
     sd_ble_gap_scan_stop();
-    sd_ble_gap_tx_power_set(4);
+    sd_ble_gap_tx_power_set(-16);
     ble_gap_addr_t     node_address       = {0, BLE_GAP_ADDR_TYPE_RANDOM_STATIC,{id, MAC_GROUP}};
     err_code = sd_ble_gap_addr_set(&node_address);
     APP_ERROR_CHECK(err_code);

@@ -58,7 +58,7 @@ static uint8_t m_beacon_info[APP_BEACON_INFO_LENGTH] =                    /**< I
 static ble_gap_scan_params_t const m_scan_params =
 {
     .active = 0,
-    .use_whitelist = 0,		
+    .use_whitelist = 1,		
     .adv_dir_report = 0,
     .interval = SCAN_INTERVAL, 		
     .window = SCAN_WINDOW,
