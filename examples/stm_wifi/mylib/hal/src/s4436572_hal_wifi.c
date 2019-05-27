@@ -86,9 +86,8 @@ uint16_t s4436572_hal_wifi_ping(uint8_t* ipAddr){
 }
 
 uint16_t s4436572_hal_wifi_write(uint8_t socket, uint8_t* txData, uint16_t txLength){
-    uint8_t length = 0, sta = 0;
+    uint8_t length = 0;
     SPI_WIFI_ReInit();
-    uint8_t ipAddr[4] = {192, 168, 43, 253};
     WIFI_SendData(socket, txData, txLength, NULL, 50);
     WIFI_ReceiveData(socket, &length, 1, NULL, 50);
     return length;

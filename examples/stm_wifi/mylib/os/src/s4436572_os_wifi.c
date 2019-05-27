@@ -209,7 +209,7 @@ extern void s4436572_TaskWifi(void){
 		if(xSemaphoreTake(s4436572_SemaphoreWifiReceiveOn, 0)){
 			uint8_t len;
 			do{
-				len = s4436572_hal_wifi_read(socket, packet.data, 20);
+				len = s4436572_hal_wifi_read(socket, (uint8_t*) packet.data, 20);
 				if(len > 0){
 					packet.length = len;
 					console_log(LOG, "Received packet %s\r\n", packet.data);

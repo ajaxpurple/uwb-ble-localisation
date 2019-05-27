@@ -1,28 +1,26 @@
-#include "stm32l4xx.h"
-#include "s4436572_hal_board.h"
+
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-#include <string.h>
 #include <stdio.h>
-
+#include "stm32l4xx.h"
 #include "s4436572_hal_printf.h"
 #include "s4436572_hal_led.h"
+#include "s4436572_os_ble.h"
+#include "s4436572_hal_imu.h"
 #include "s4436572_hal_sysclk.h"
 #include "stm32l4xx_hal.h"
 #include "stm32l475e_iot01.h"
-
 #include "s4436572_os_log.h"
 #include "s4436572_os_cli.h"
 #include "s4436572_os_led.h"
-#include "s4436572_os_wifi.h"
-
 #include "task.h"
 
+
 #include "s4436572_cli_log.h"
-#include "s4436572_cli_wifi.h"
+#include "s4436572_cli_ble.h"
 
-
+#define STM32_ID 10
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -30,7 +28,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void Hardware_init(void);
 
-#define TASK_STACK_SIZE (configMINIMAL_STACK_SIZE*2)
+#define TASK_STACK_SIZE (configMINIMAL_STACK_SIZE*3)
 void Hardware_init(void);
 void Blink_Task(void);
 
@@ -52,14 +50,16 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  SystemClock_Config();  
+  SystemClock_Config();
+
   s4436572_os_led_init(); 
+  s4436572_os_ble_init(); 
   s4436572_os_log_init(); //Initialise printf function
-  s4436572_os_wifi_init();
-  s4436572_os_cli_init(); //Start CLI task	
   
+  s4436572_os_cli_init(); //Start CLI task	
+
   s4436572_cli_log_init(); //CLI log
-  s4436572_cli_wifi_init(); //CLI Wifi
+  s4436572_cli_ble_init(); //CLI Bluetooth
   
   xTaskCreate((TaskFunction_t) &Blink_Task, (const char *) "blink", TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, &taskBlinkHandle);
   vTaskStartScheduler();
@@ -68,26 +68,20 @@ int main(void)
   	return 0;
 }
 
-void Blink_Task(){
-	NetworkConfig config;
-	strcpy(config.SSID, "ajaxpurple");
-	strcpy(config.password, "4011prac3");    
-	xQueueSend(s4436572_QueueWifiNetworkConfig, &config, 50);
-
-	Connection conn;
-	uint8_t address[] =  {192, 168, 43, 253};
-    //uint8_t address[] =  {192, 168, 0, 5};
-    memcpy(conn.address, address, 4);
-    conn.port = 65432;
-    xQueueSend(s4436572_QueueWifiConnectionConfig, &conn, 50);
-    xSemaphoreGive(s4436572_SemaphoreWifiJoin);
-    xSemaphoreGive(s4436572_SemaphoreWifiConnect);
-
-	for(;;){
-		vTaskDelay(300);
-	}
+void Blink_Task(void){
+  BLEPacket packet;
+	uint8_t device_id = STM32_ID;
+	uint8_t node_id = 0;
+  xSemaphoreGive(s4436572_SemaphoreBLEAdvertiseStart);
+  for(;;){
+    s4436572_hal_led_toggle(0);
+  	packet.major = node_id;
+	  packet.minor = device_id;
+	  xQueueSend(s4436572_QueueBLEAdvertise, &packet, 10);
+      vTaskDelay(100);
+  }
+  /* USER CODE END 3 */
 }
-
 void vApplicationMallocFailedHook( void )
 {
 	/* Called if a call to pvPortMalloc() fails because there is insufficient
@@ -146,40 +140,4 @@ void vApplicationIdleHook( void )
 void vApplicationTickHook( void ){
 	HAL_IncTick();
 	count++;
-}
-
-void NMI_Handler(void)
-{
-}
-
-void HardFault_Handler(void)
-{
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
-}
-
-void MemManage_Handler(void)
-{
-  /* Go to infinite loop when Memory Manage exception occurs */
-  while (1)
-  {
-  }
-}
-
-void BusFault_Handler(void)
-{
-  /* Go to infinite loop when Bus Fault exception occurs */
-  while (1)
-  {
-  }
-}
-
-void UsageFault_Handler(void)
-{
-  /* Go to infinite loop when Usage Fault exception occurs */
-  while (1)
-  {
-  }
 }
