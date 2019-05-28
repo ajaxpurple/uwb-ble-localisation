@@ -41,11 +41,13 @@
     <configuration
       Name="External Keil"
       c_additional_options="--reduce_paths" />
+      <folder Name="Common">
+      <file file_name="../../common/os_ble.c" />
+      <file file_name="../../common/os_ble.h" />
+      </folder>
     <folder Name="Application">
       <file file_name="main.c" />
       <file file_name="sdk_config.h" />
-      <file file_name="os_ble.c" />
-      <file file_name="os_ble.h" />
       <file file_name="ss_init_main.h" />
       <file file_name="ss_init_main.c" />
     </folder>

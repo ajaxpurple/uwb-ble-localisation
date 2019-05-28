@@ -16,7 +16,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf.h"
 
-#include "SES/os_ble.h"
+#include "../common/os_ble.h"
 #include "app_timer.h"
 #include "app_error.h"
 #include "app_button.h"
