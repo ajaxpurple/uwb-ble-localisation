@@ -16,6 +16,7 @@ examples/*/Keil*
 *.ilk
 *.map
 *.exp
+*.ind
 
 # Precompiled Headers
 *.gch
