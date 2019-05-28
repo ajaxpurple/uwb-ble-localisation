@@ -58,7 +58,7 @@ static uint8_t m_beacon_info[APP_BEACON_INFO_LENGTH] =                    /**< I
 static ble_gap_scan_params_t const m_scan_params =
 {
     .active = 0,
-    .use_whitelist = 1,		
+    .use_whitelist = 0,		
     .adv_dir_report = 0,
     .interval = SCAN_INTERVAL, 		
     .window = SCAN_WINDOW,
@@ -130,14 +130,16 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
         data =  p_adv_report->data;
         rssi = p_adv_report->rssi;
         
-        for(uint8_t i=0; i<16; i++){
-          if(m_beacon_info[i+2] != data[i+9]){
-            match = false;
-          }
-         }
-         if(match){
+        //for(uint8_t i=0; i<16; i++){
+         // if(m_beacon_info[i+2] != data[i+9]){
+          //  match = false;
+          //}
+        // }
+        match = p_adv_report->peer_addr.addr[1] == 0 && p_adv_report->peer_addr.addr[0] < 6;
 
-          ping = (data[7 + 19]<<8) | rssi;
+         if(match){
+          ping = (p_adv_report->peer_addr.addr[0]<<8) | rssi;
+          //ping = (data[7 + 19]<<8) | rssi;
           xQueueSend(bleScanResult, &ping, 0);
           /*
           printf("%d: Received target %02x:%02x:%02x:%02x:%02x:%02x, RSSI: %d\n",
@@ -188,8 +190,12 @@ void scan_start(void) {
     const ble_gap_addr_t     whitelist_static_1 	= {0, BLE_GAP_ADDR_TYPE_RANDOM_STATIC,{0x01,MAC_GROUP}}; 	
     const ble_gap_addr_t     whitelist_static_2 	= {0, BLE_GAP_ADDR_TYPE_RANDOM_STATIC,{0x02,MAC_GROUP}}; 	
     const ble_gap_addr_t     whitelist_static_3       = {0, BLE_GAP_ADDR_TYPE_RANDOM_STATIC,{0x03,MAC_GROUP}};
-    const ble_gap_addr_t*    p_whitelist_addr[4] = {&whitelist_mobile, &whitelist_static_1, &whitelist_static_2, &whitelist_static_3};
-    err_code = sd_ble_gap_whitelist_set(p_whitelist_addr, 4);
+    const ble_gap_addr_t     whitelist_static_4       = {0, BLE_GAP_ADDR_TYPE_RANDOM_STATIC,{0x04,MAC_GROUP}};
+    const ble_gap_addr_t     whitelist_static_5       = {0, BLE_GAP_ADDR_TYPE_RANDOM_STATIC,{0x05,MAC_GROUP}};
+
+
+    const ble_gap_addr_t*    p_whitelist_addr[6] = {&whitelist_mobile, &whitelist_static_1, &whitelist_static_2, &whitelist_static_3,&whitelist_static_4,&whitelist_static_5};
+    err_code = sd_ble_gap_whitelist_set(p_whitelist_addr, 6);
     APP_ERROR_CHECK(err_code); 	 
 
     sd_ble_gap_scan_stop();

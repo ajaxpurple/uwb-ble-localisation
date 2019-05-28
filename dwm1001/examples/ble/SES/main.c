@@ -40,6 +40,7 @@
 
 uint8_t node_id = 0;
 bool is_synced = false;
+int8_t ble_rssi[5];
 
 TaskHandle_t  ss_initiator_task_handle;   /**< Reference to TWR Initiator FreeRTOS task. */
 extern void ss_initiator_task_function (void * pvParameter);
@@ -89,14 +90,22 @@ void uwbTask(){
   }
 }
 
+void printTask(){
+  for(;;){
+    printf("{\"uwb\":[%d, %d, %d],", val1, val2, val3);
+    printf("\"ble\":[%d, %d, %d, %d, %d]}\r",  ble_rssi[0], ble_rssi[1], ble_rssi[2], ble_rssi[3], ble_rssi[4]);
+    vTaskDelay(500);
+  }
+}
+
 void mainTask(){
   
   uint16_t ping;
   uint8_t recv_node_id;
   
-  bool ble_received[3] = {false};
+  //bool ble_received[5] = {false};
   
-  int8_t ble_rssi[3];
+
   int8_t rssi;
   
   bool all_done;
@@ -108,7 +117,7 @@ void mainTask(){
 
   for(;;){
       
-      if (xQueueReceive(bleScanResult, &ping, 0) == pdPASS) {
+      if (xQueueReceive(bleScanResult, &ping, 50) == pdPASS) {
          
          LEDS_INVERT(BSP_LED_1_MASK);
          vTaskDelay(10);
@@ -120,23 +129,22 @@ void mainTask(){
          if(recv_node_id > 0){
              //printf("Node: %d, RSSI: %d\r\n", recv_node_id, rssi);
              //printf("USS: %d\n\r", rssi);
-             ble_received[recv_node_id-1] = true;
+             //ble_received[recv_node_id-1] = true;
              ble_rssi[recv_node_id-1] = rssi;
-             all_done = true;
-             for(uint8_t i=0; i<3; i++){
-              all_done = all_done && ble_received[i];
-             }
-           if(all_done && (xTaskGetTickCount() - task_counter > 500)){
-              //printf("{ble:[%d,%d,%d]}\r\n", ble_rssi[0], ble_rssi[1], ble_rssi[2]);
-              for(uint8_t i=0; i<3; i++){
-                ble_received[i] = false;
-              }
+             //all_done = true;
+             //for(uint8_t i=0; i<3; i++){
+             // all_done = all_done && ble_received[i];
+             //}
+           //if(all_done && (xTaskGetTickCount() - task_counter > 500)){
+           //   printf("{\"ble\":[%d,%d,%d, %d, %d]}\r", ble_rssi[0], ble_rssi[1], ble_rssi[2], ble_rssi[3], ble_rssi[4]);
+            //  for(uint8_t i=0; i<3; i++){
+            //    ble_received[i] = false;
+            //  }
 
-              task_counter = xTaskGetTickCount();
-           }
+            //  task_counter = xTaskGetTickCount();
+           //}
         }
       }
-      vTaskDelay(50);
  }
 }
 
@@ -193,6 +201,7 @@ int main(void){
   xTaskCreate( bleTask, "ble", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
   xTaskCreate( uwbTask, "uwb", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
   xTaskCreate( mainTask, "main", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
+  xTaskCreate( printTask, "print", 100, NULL, tskIDLE_PRIORITY + 1, NULL );
   vTaskStartScheduler();
   while(1){
     APP_ERROR_HANDLER(NRF_ERROR_FORBIDDEN);

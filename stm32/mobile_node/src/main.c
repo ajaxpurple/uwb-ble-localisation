@@ -76,7 +76,7 @@ void Blink_Task(){
 	Connection conn;
 	uint8_t address[] = IP_ADDRESS;
 	memcpy(conn.address, address, 4);
-	conn.port = PORT;
+	conn.port = PORT_NO;
 	xQueueSend(s4436572_QueueWifiConnectionConfig, &conn, 50);
 	xSemaphoreGive(s4436572_SemaphoreWifiJoin);
 	xSemaphoreGive(s4436572_SemaphoreWifiConnect);

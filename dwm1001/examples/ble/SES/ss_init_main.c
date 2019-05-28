@@ -59,7 +59,7 @@ static uint8 rx_buffer[RX_BUF_LEN];
 static uint32 status_reg = 0;
 
 /* UWB microsecond (uus) to device time unit (dtu, around 15.65 ps) conversion factor.
-* 1 uus = 512 / 499.2 µs and 1 µs = 499.2 * 128 dtu. */
+* 1 uus = 512 / 499.2 s and 1 s = 499.2 * 128 dtu. */
 #define UUS_TO_DWT_TIME 65536
 
 /* Speed of light in air, in metres per second. */
@@ -440,11 +440,11 @@ void ss_initiator_task_function (void * pvParameter)
     ss_init_run3();
     vTaskDelay(RNG_DELAY_MS);
 
-    printf("Hi\n\r");
+    //printf("Hi\n\r");
 
     if (xTaskGetTickCount() - task_counter > 500) {
       task_counter = xTaskGetTickCount();
-      printf("{UWB:[%d,%d,%d]}\n\r", val1, val2, val3);
+      //printf("{\"uwb\":[%d,%d,%d], }\r", val1, val2, val3);
     }
     //printf("wifi -w {UWB:[%d,%d,%d]}\n\r", val1, val2, val3);
     //printf("USS: %d\n\r", val1);
