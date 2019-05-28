@@ -55,11 +55,8 @@ SemaphoreHandle_t s4436572_SemaphoreBLEAdvertiseStart;
 
 BLEPacket blePacket;
 
-uint8_t sendingUUID[] = {
-	0x43, 0x98, 0x17, 0x22, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
-uint8_t serverAddr[] = {0x00, 0x00, 0x22, 0x17, 0x98, 0x43};
+uint8_t sendingUUID[] = UUID;
+uint8_t serverAddr[] = MAC_ADDR;
 IBeaconData beaconData;
 
 uint8_t addrFilter[] = {0x26, 0x84, 0x33, 0x44, 0x00, 0x00};
@@ -203,7 +200,7 @@ extern void s4436572_TaskBLE(void){
 					xQueueSend(s4436572_QueueBLEBeacon, &beaconData, 0);
 				}
 		}
-		vTaskDelay(100);
+		vTaskDelay(50);
 		s4436572_hal_led_write(LED_BLE, 0);
 	}
 }

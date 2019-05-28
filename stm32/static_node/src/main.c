@@ -20,8 +20,6 @@
 #include "s4436572_cli_log.h"
 #include "s4436572_cli_ble.h"
 
-#define STM32_ID 10
-
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 
@@ -70,13 +68,11 @@ int main(void)
 
 void Blink_Task(void){
   BLEPacket packet;
-	uint8_t device_id = STM32_ID;
-	uint8_t node_id = 0;
   xSemaphoreGive(s4436572_SemaphoreBLEAdvertiseStart);
   for(;;){
     s4436572_hal_led_toggle(0);
-  	packet.major = node_id;
-	  packet.minor = device_id;
+  	packet.major = NODE_ID;
+	  packet.minor = 0;
 	  xQueueSend(s4436572_QueueBLEAdvertise, &packet, 10);
       vTaskDelay(100);
   }

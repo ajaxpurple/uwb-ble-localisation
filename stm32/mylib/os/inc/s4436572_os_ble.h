@@ -16,6 +16,7 @@
 #define S4436572_OS_BLE_H
 
 #include "semphr.h"
+#include "config.h"
 
 
 typedef struct{

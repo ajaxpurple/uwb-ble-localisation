@@ -1,33 +1,27 @@
+#include "stm32l4xx.h"
+#include "s4436572_hal_board.h"
 
-/**
-  ******************************************************************************
-  * @file    project2/main.c
-  *  @author  Rohan Malik � 44365721
-  * @date    17052018
-  * @brief   Project 2
-  ******************************************************************************
-  *
-  */
-
-/* Includes. */
+/* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
+#include <string.h>
 #include <stdio.h>
-#include "stm32l4xx_hal.h"
+#include "config.h"
+
 #include "s4436572_hal_printf.h"
-#include "s4436572_os_led.h"
-#include "s4436572_os_time.h"
-#include "s4436572_os_fatfs.h"
-#include "s4436572_os_rec.h"
+#include "s4436572_hal_led.h"
+#include "s4436572_hal_sysclk.h"
+#include "stm32l4xx_hal.h"
+#include "stm32l475e_iot01.h"
+
 #include "s4436572_os_log.h"
 #include "s4436572_os_cli.h"
+#include "s4436572_os_led.h"
+#include "s4436572_os_wifi.h"
 
+#include "task.h"
 
 #include "s4436572_cli_log.h"
-#include "s4436572_cli_led.h"
-#include "s4436572_cli_time.h"
-#include "s4436572_cli_fatfs.h"
-#include "s4436572_hal_led.h"
-#include "task.h"
+#include "s4436572_cli_wifi.h"
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -35,44 +29,62 @@
 /* Private function prototypes -----------------------------------------------*/
 void Hardware_init(void);
 
+#define TASK_STACK_SIZE (configMINIMAL_STACK_SIZE*2)
+void Hardware_init(void);
+void Blink_Task(void);
+
 uint32_t count = 0;
 uint32_t lastCount = 0;
-
-void HardFault_Handler(){
-	while(1){
-
-	}
-}
+TaskHandle_t taskBlinkHandle;
 
 /**
-  * @brief  Starts all the other tasks, then starts the scheduler.
-  * @param  None
-  * @retval None
+  * @brief  The application entry point.
+  * @retval int
   */
-int main( void ) {
+int main(void)
+{
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  //s4436572_os_led_init(); //Initialise pantilt
-	s4436572_os_fatfs_init(); //Initialise radio
-	s4436572_os_rec_init(); //Initialise radio
-	s4436572_os_log_init(); //Initialise printf function
-	s4436572_os_cli_init(); //Start CLI task	
-
-	s4436572_cli_fatfs_init();
-	//s4436572_cli_led_init(); //CLI led
-	//s4436572_cli_time_init(); //CLI system timer
-	s4436572_cli_log_init(); //CLI log	
-
-	/* Start the scheduler.
-
-	NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.
-	The processor MUST be in supervisor mode when vTaskStartScheduler is
-	called.  The demo applications included in the FreeRTOS.org download switch
-	to supervisor mode prior to main being called.  If you are not using one of
-	these demo application projects then ensure Supervisor mode is used here. */
-	vTaskStartScheduler();
+  SystemClock_Config();  
+  s4436572_os_led_init(); 
+  s4436572_os_log_init(); //Initialise printf function
+  s4436572_os_wifi_init();
+  s4436572_os_cli_init(); //Start CLI task	
+  
+  s4436572_cli_log_init(); //CLI log
+  s4436572_cli_wifi_init(); //CLI Wifi
+  
+  xTaskCreate((TaskFunction_t) &Blink_Task, (const char *) "blink", TASK_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, &taskBlinkHandle);
+  vTaskStartScheduler();
 
 	/* We should never get here as control is now taken by the scheduler. */
   	return 0;
+}
+
+void Blink_Task(){
+	NetworkConfig config;
+	strcpy(config.SSID, "ajaxpurple");
+	strcpy(config.password, "4011prac3");    
+	xQueueSend(s4436572_QueueWifiNetworkConfig, &config, 50);
+
+	Connection conn;
+	uint8_t address[] = IP_ADDRESS;
+	memcpy(conn.address, address, 4);
+	conn.port = PORT;
+	xQueueSend(s4436572_QueueWifiConnectionConfig, &conn, 50);
+	xSemaphoreGive(s4436572_SemaphoreWifiJoin);
+	xSemaphoreGive(s4436572_SemaphoreWifiConnect);
+
+	for(;;){
+		s4436572_hal_led_toggle(0);
+		vTaskDelay(300);
+	}
 }
 
 void vApplicationMallocFailedHook( void )
@@ -133,4 +145,40 @@ void vApplicationIdleHook( void )
 void vApplicationTickHook( void ){
 	HAL_IncTick();
 	count++;
+}
+
+void NMI_Handler(void)
+{
+}
+
+void HardFault_Handler(void)
+{
+  /* Go to infinite loop when Hard Fault exception occurs */
+  while (1)
+  {
+  }
+}
+
+void MemManage_Handler(void)
+{
+  /* Go to infinite loop when Memory Manage exception occurs */
+  while (1)
+  {
+  }
+}
+
+void BusFault_Handler(void)
+{
+  /* Go to infinite loop when Bus Fault exception occurs */
+  while (1)
+  {
+  }
+}
+
+void UsageFault_Handler(void)
+{
+  /* Go to infinite loop when Usage Fault exception occurs */
+  while (1)
+  {
+  }
 }

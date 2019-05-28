@@ -5,11 +5,12 @@ OBJ_PROJ = $(PROJ)/Obj
 SRC_PROJ = $(PROJ)/src
 INC_PROJ = $(PROJ)/inc
 TARGET = $(OBJ_PROJ)/program
+CONFIG = ./
 PROJ_SRC_FILES = $(wildcard $(SRC_PROJ)/*.c)
 PROJ_OBJ_FILES = $(patsubst $(SRC_PROJ)/%.c,$(OBJ_PROJ)/%.o,$(PROJ_SRC_FILES))
 PROJ_LIB = $(TARGET).a
 
-C_INCLUDES = $(foreach d, $(INC) $(INC_PROJ), -I$d)
+C_INCLUDES = $(foreach d, $(INC) $(INC_PROJ) $(CONFIG), -I$d)
 CFLAGS = $(MCU_FLAGS) $(C_DEFS) $(C_INCLUDES) $(OPT) $(F_FLAGS) $(EXT_FLAGS)
 
 STARTUP = $(SRC_DEV)/gcc/startup_$(MCU_CHIP_L)xx.s
@@ -27,7 +28,7 @@ run: $(TARGET).bin program.elf
 	st-flash reset
 	cu -l /dev/ttyACM* -s 115200
 
-program.elf: $(TARGET).elf
+program.elf: $(TARGET).elf 
 	cp $(TARGET).elf program.elf
 
 debug: $(TARGET).elf 
@@ -59,7 +60,7 @@ $(PROJ_LIB) $(ALL_LIB): | $(DIR_LIB)
 	@echo ' '
 
 $(OBJ_PROJ) $(ALL_OBJ) $(DIR_LIB):;mkdir -p $@
-$(OBJ_PROJ)/%.o: $(SRC_PROJ)/%.c | $(OBJ_PROJ); $(CC) -c $(CFLAGS) -o $@ $<
+$(OBJ_PROJ)/%.o:  $(SRC_PROJ)/%.c | $(OBJ_PROJ); $(CC) -c $(CFLAGS) -o $@ $<
 
 clean:
 	find . -name Obj | xargs rm -rf

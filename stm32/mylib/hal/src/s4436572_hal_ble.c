@@ -172,7 +172,7 @@ void s4436572_hal_ble_advertise_start(){
   }
   BSP_SPI3_ReInit();
   aci_gap_set_discoverable(ADV_SCAN_IND, 0, 0, PUBLIC_ADDR, NO_WHITE_LIST_USE, 0, NULL, 0, NULL, 0, 0);  
-  aci_gap_delete_ad_type(AD_TYPE_TX_POWER_LEVEL);    
+  aci_gap_delete_ad_type(AD_TYPE_TX_POWER_LEVEL);     
   state = TX;
 }
 
@@ -238,7 +238,6 @@ void user_notify(void * pData)
   /* obtain event packet */
   hci_event_pckt *event_pckt = (hci_event_pckt*)hci_pckt->data;
   evt_le_meta_event *evt;
-  evt_le_connection_complete *cc;
   le_advertising_info* adv_evt;
   
   if(hci_pckt->type != HCI_EVENT_PKT){

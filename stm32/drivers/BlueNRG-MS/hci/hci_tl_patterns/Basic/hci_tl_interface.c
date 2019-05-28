@@ -95,9 +95,9 @@ int32_t HCI_TL_SPI_DeInit(void)
 int32_t HCI_TL_SPI_Reset(void)
 {
   HAL_GPIO_WritePin(HCI_TL_RST_PORT, HCI_TL_RST_PIN, GPIO_PIN_RESET);
-  HAL_Delay(5);
+  vTaskDelay(5);
   HAL_GPIO_WritePin(HCI_TL_RST_PORT, HCI_TL_RST_PIN, GPIO_PIN_SET);
-  HAL_Delay(5);    
+  vTaskDelay(5);    
   return 0;
 }  
 
