@@ -16,7 +16,7 @@
 #define APP_BEACON_INFO_LENGTH          0x17                               
 #define APP_ADV_DATA_LENGTH             0x15                               
 #define APP_DEVICE_TYPE                 0x02                               
-#define APP_MEASURED_RSSI               0xC3                
+#define APP_MEASURED_RSSI               0xBF                 
 #define APP_COMPANY_IDENTIFIER          0x004C                             
 #define APP_MAJOR_VALUE                 0x00, 0x00                         /**< Major value used to identify Beacons. */
 #define APP_MINOR_VALUE                 0x00, 0x00                         /**< Minor value used to identify Beacons. */
@@ -104,7 +104,7 @@ static void advertising_init(void)
 
     sd_ble_gap_adv_stop();
     sd_ble_gap_scan_stop();
-    sd_ble_gap_tx_power_set(4);
+    sd_ble_gap_tx_power_set(-8);
     ble_gap_addr_t     node_address       = {0, BLE_GAP_ADDR_TYPE_RANDOM_STATIC,{id, MAC_GROUP}};
     err_code = sd_ble_gap_addr_set(&node_address);
     APP_ERROR_CHECK(err_code);

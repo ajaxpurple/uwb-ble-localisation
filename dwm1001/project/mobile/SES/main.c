@@ -94,6 +94,9 @@ void printTask(){
   for(;;){
     printf("{\"uwb\":[%d, %d, %d],", val1, val2, val3);
     printf("\"ble\":[%d, %d, %d, %d, %d]}\r",  ble_rssi[0], ble_rssi[1], ble_rssi[2], ble_rssi[3], ble_rssi[4]);
+    for(uint8_t i=0; i<5; i++){
+      ble_rssi[i] = 127;
+    }
     vTaskDelay(500);
   }
 }

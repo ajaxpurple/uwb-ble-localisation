@@ -131,7 +131,7 @@ void s4436572_hal_ble_init(uint8_t* serverAddress){
   aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, serverAddress);
   aci_gatt_init();  
   aci_gap_init_IDB05A1(GAP_OBSERVER_ROLE_IDB05A1 | GAP_PERIPHERAL_ROLE_IDB05A1, 0, 0x08, &service_handle, &dev_name_char_handle, &appearance_char_handle);
-  aci_hal_set_tx_power_level(1,7);
+  aci_hal_set_tx_power_level(0,0);
   hci_le_set_scan_resp_data(0, NULL);
 }
 
