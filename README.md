@@ -4,6 +4,7 @@ This repository contains all the code required for localisation:
  - DWM1001 firmware codebase for UWB and BLE
 
 Python GUI:
+Command: python3 tasks.py
 
 STM32:
 Use makefile to run code:
