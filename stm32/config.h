@@ -2,6 +2,7 @@
 #define CONFIG_H
 #define IP_ADDRESS {192, 168, 43, 36}
 //#define IP_ADDRESS {192, 168, 43, 253}
+//#define IP_ADDRESS {192, 168, 43, 47}
 #define PORT_NO 65432
 #define NODE_ID 5
 #define MAC_ADDR {NODE_ID, 0x00, 0x00, 0x36, 0xCE, 0xF4}
